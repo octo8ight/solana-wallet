@@ -20,16 +20,16 @@ import { clusterApiUrl, Connection, PublicKey, Transaction } from "@solana/web3.
 import { createTransferCheckedInstruction, getAssociatedTokenAddress, getMint } from "@solana/spl-token";
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { useWallet } from "@solana/wallet-adapter-react";
-import { getProgram } from "./utils/api";
+import { createToken } from "./utils/api";
+import Arena from './components/Arena';
 
 function App() {
-  const wallet = useWallet();
   const tokenAddress = "Fi8Q7AV8Nr8fJy27j4QpnHe3iJCHHsPcYQ1TSUoi8A1J";
-
+  
   const network = WalletAdapterNetwork.Devnet;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
   const connection = new Connection(endpoint);
-
+  
   const wallets = [
     new GlowWalletAdapter(),
     new PhantomWalletAdapter(),
@@ -37,14 +37,11 @@ function App() {
     new TorusWalletAdapter(),
     new SkyWalletAdapter(),
   ];
+  const wallet = useWallet();
 
-  useEffect(() => {
-    const getData = async () => {
-      const res = await getProgram(wallet, endpoint);
-      console.log(res);  
-    }
-    getData();
-  }, [endpoint, wallet]);
+  const handleCreateToken = async () => {
+    await createToken(wallet, endpoint);
+  }
 
   return (
     <div className="App">
@@ -56,13 +53,13 @@ function App() {
           </p>
         </div>
         <div className="footer-container">
-          <ConnectionProvider endpoint={endpoint}>
-            <WalletProvider wallets={wallets}>
-              <WalletModalProvider>
-                <WalletMultiButton />
-              </WalletModalProvider>
+        <ConnectionProvider endpoint={endpoint}>
+            <WalletProvider wallets={wallets} autoConnect>
+                <WalletModalProvider>
+                    <Arena network={endpoint}/>
+                </WalletModalProvider>
             </WalletProvider>
-          </ConnectionProvider>
+        </ConnectionProvider>
         </div>
       </div>
     </div>
